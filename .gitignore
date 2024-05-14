@@ -1,0 +1,28 @@
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# Flask
+instance/
+.env
+venv/
+
+# SQL
+*.db
+*.sqlite
+*.sql
+
+# IDE/Editor
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# Logs
+*.log*
+
+# Miscellaneous
+*.swp
+.DS_Store

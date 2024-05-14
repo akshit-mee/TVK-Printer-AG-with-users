@@ -1,0 +1,2 @@
+FLASK_APP=Printer.py
+FLASK_DEBUG=1
