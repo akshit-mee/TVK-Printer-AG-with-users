@@ -6,6 +6,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin, AnonymousUserMixin
 from datetime import datetime, timezone
 import pytz
+from datetime import timedelta, datetime
 
 
 class User(UserMixin, db.Model):
@@ -21,7 +22,7 @@ class User(UserMixin, db.Model):
     role_id: so.Mapped[int] = db.mapped_column(sa.ForeignKey('role.id'), index=True)
     role: so.Mapped['Role'] = so.relationship(backref=db.backref('users', lazy=True))
     prints: so.WriteOnlyMapped['Prints'] = so.relationship(back_populates='printed_by_name')
-    fs_uniquifier: so.Mapped[str] = so.mapped_column(sa.String(64), unique = True, nullable=True)
+    # fs_uniquifier: so.Mapped[str] = so.mapped_column(sa.String(64), unique = True, nullable=True)
 
 
 
@@ -34,9 +35,27 @@ class User(UserMixin, db.Model):
     def check_password(self, password):
         return check_password_hash(self.password_hash, password)
     
-    def can_print(self, number_of_pages):
+    def balance_check(self, number_of_pages):
         return (self.balance*20 >= number_of_pages)
-            # and self.weekly_print_number + number_of_pages <= self.weekly_limit
+    
+    def sum_pages_last_week(self, printed_by_id):
+        last_week_start = datetime.now(timezone.utc) - timedelta(days=7)
+        last_week_end = datetime.now(timezone.utc)
+
+        total_pages_last_week = db.session.query(db.func.sum(Prints.number_of_pages)).filter(Prints.printed_by_id == printed_by_id).filter(Prints.time_stamp >= last_week_start).filter(Prints.time_stamp <= last_week_end).scalar()
+        self.weekly_print_number = total_pages_last_week
+        return total_pages_last_week if total_pages_last_week else None
+
+    def weekly_limit_check(self, number_of_pages):
+        sum_pages = self.sum_pages_last_week(self.id)
+        if self.weekly_print_number==None:
+            return True
+        else:
+            return (self.weekly_print_number + number_of_pages <= self.weekly_limit)
+
+
+    def can_print(self, number_of_pages):
+        return (self.balance_check(number_of_pages) and self.weekly_limit_check(number_of_pages))
     
     def post_printing(self, number_of_pages):
         self.pages_printed += number_of_pages

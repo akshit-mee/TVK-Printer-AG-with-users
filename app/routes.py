@@ -88,13 +88,11 @@ def register():
 
 class AdminPage(BaseView):
     def is_accessible(self):
-        return current_user.is_authenticated
-        # current_user.role.name == 'Admin'
+        return current_user.is_authenticated and current_user.role.name == 'Admin'
 
 class AdminModelView(ModelView):
     def is_accessible(self):
-        return current_user.is_authenticated
-        # current_user.role.name == 'Admin'
+        return current_user.is_authenticated and current_user.role.name == 'Admin'
 
     def _handle_view(self, name, **kwargs):
         if not self.is_accessible():
@@ -115,8 +113,8 @@ class RoleAdmin(AdminModelView):
     column_filters = ('name',)
 
 class PrintAdmin(AdminModelView):
-    column_list = ('id','number_of_pages', 'printed_by_name' )
-    column_labels = {'id': 'ID', 'number_of_pages': 'Pages', 'printed_by_name.username': 'Printed By'}
+    column_list = ('id','number_of_pages', 'printed_by_name', 'time')
+    column_labels = {'id': 'ID', 'number_of_pages': 'Pages', 'printed_by_name.username': 'Printed By', 'time_stamp': 'Time'}
 admin = Admin(app, name = 'Admin Panel', base_template='my_master.html', template_mode = 'bootstrap4')
 # admin.add_view(ModelView(models.User, db.session))
 # admin.add_view(ModelView(models.Role, db.session))
@@ -173,6 +171,7 @@ def upload():
 # checking page number
         number_of_pages = get_number_of_pages(temp_file.name)
         temp_file.close()
+        number_of_pages = number_of_pages * copies
 
 
         #TODO add start page and end page validation
@@ -192,7 +191,6 @@ def upload():
 
         printer_name = "TvK-Printer-AG-BW"  # Replace with your printer name
         
-        
         if current_user.can_print(number_of_pages):
             # Printing the file
             # cups.setUser (user_name)
@@ -204,8 +202,12 @@ def upload():
             db.session.add(print)
             db.session.commit()
 
-        else:
+        elif current_user.balance_check(number_of_pages):
+            return('weekly limit exceeded')
+        elif current_user.weekly_limit_check(number_of_pages):
             return('low balance')
+        else:
+            return('Error: CAN NOT PRINT')
 
         os.remove(temp_file.name)
 
