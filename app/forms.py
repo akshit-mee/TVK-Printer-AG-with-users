@@ -4,6 +4,7 @@ from wtforms.validators import DataRequired, ValidationError, Email, EqualTo
 import sqlalchemy as sa
 from app import db
 from app.models import User
+from flask_login import current_user
 
 class LoginForm(FlaskForm):
     username = StringField('Username', validators=[DataRequired()])
@@ -23,4 +24,16 @@ class RegistrationForm(FlaskForm):
             User.username == username.data))
         if user is not None:
             raise ValidationError('Username already registered')
+        
+class ChangePasswordForm(FlaskForm):
+    current_password = StringField('Current Password', validators=[DataRequired()])
+    new_password = StringField('New Password', validators=[DataRequired()])
+    new_password2 = StringField('Repeat New Password', validators=[DataRequired(), EqualTo('new_password')])
+    submit = SubmitField('Change Password')
+    
+    def validate_old_password(self, old_password):
+        user = User.query.filter_by(username=current_user.username).first()
+        if not user.check_password(old_password.data):
+            raise ValidationError('Old password is incorrect')
+        
 

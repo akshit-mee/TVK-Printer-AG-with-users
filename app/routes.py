@@ -1,6 +1,6 @@
 from flask import render_template, flash, redirect, url_for, request, abort
 from app import app, db
-from app.forms import LoginForm, RegistrationForm
+from app.forms import LoginForm, RegistrationForm, ChangePasswordForm
 from flask_login import current_user, login_user, logout_user, login_required
 import sqlalchemy as sa
 from app.models import User, Role, Prints
@@ -80,6 +80,25 @@ def register():
         flash('Registatration Complete!!')
         return redirect(url_for('login'))
     return render_template('register.html', title='Register', form=form)
+
+###################################################################################################
+# User Profile and Change Password
+###################################################################################################
+@app.route('/edit_user', methods=['GET', 'POST'])
+@login_required
+def edit_user():
+    form = ChangePasswordForm()
+    if form.validate_on_submit():
+        if current_user.check_password(form.current_password.data):
+            current_user.set_password(form.new_password.data)
+            db.session.commit()
+            flash('Password Changed Successfully')
+            return redirect(url_for('index'))
+        else:
+            flash('Incorrect Password')
+            return redirect(url_for('edit_user'))
+    return render_template('edit_user.html', title='Change Password', form=form)
+
 
 
 ###################################################################################################
