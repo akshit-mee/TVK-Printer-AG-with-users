@@ -135,6 +135,10 @@
                 {% if current_user.role.name=='Admin' %}
                 <a href="{{ url_for('admin.index') }}">Admin</a>
                 {% endif %}
+                {% if current_user.role.name=='Admin' or current_user.role.name=='Printer_AG' %}
+                <a href="{{ url_for('add_user') }}">Add User</a>
+                <a href="{{ url_for('add_balance') }}">Add Balance</a>
+                {% endif %}
             </div>
             <br>
             <div class="content">

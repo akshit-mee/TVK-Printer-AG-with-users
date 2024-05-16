@@ -1,6 +1,6 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, BooleanField, SubmitField
-from wtforms.validators import DataRequired, ValidationError, Email, EqualTo
+from wtforms import StringField, PasswordField, BooleanField, SubmitField, IntegerField
+from wtforms.validators import DataRequired, ValidationError, Email, EqualTo, NumberRange
 import sqlalchemy as sa
 from app import db
 from app.models import User
@@ -35,5 +35,30 @@ class ChangePasswordForm(FlaskForm):
         user = User.query.filter_by(username=current_user.username).first()
         if not user.check_password(old_password.data):
             raise ValidationError('Old password is incorrect')
+        
+class AddUserForm(FlaskForm):
+    username = StringField('Username', validators=[DataRequired()])
+    password = StringField('Password', validators=[DataRequired()])
+    password2 = StringField('Repeat Password', validators=[DataRequired(), EqualTo('password')])
+    room_number = IntegerField('Room Number', validators=[DataRequired()])
+    balance = IntegerField('Balance', validators=[DataRequired(), NumberRange(min=0)])
+    submit = SubmitField('Add User')
+    
+    def validate_username(self, username):
+        user = db.session.scalar(sa.select(User).where(
+            User.username == username.data))
+        if user is not None:
+            raise ValidationError('Username already registered')
+        
+class AddBalanceForm(FlaskForm):
+    username = StringField('Username', validators=[DataRequired()])
+    balance = IntegerField('Balance', validators=[DataRequired(), NumberRange(min=0)])
+    submit = SubmitField('Add Balance')
+    
+    def validate_username(self, username):
+        user = db.session.scalar(sa.select(User).where(
+            User.username == username.data))
+        if user is None:
+            raise ValidationError('Username not found')
         
 

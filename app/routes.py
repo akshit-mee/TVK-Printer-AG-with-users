@@ -1,6 +1,6 @@
 from flask import render_template, flash, redirect, url_for, request, abort
 from app import app, db
-from app.forms import LoginForm, RegistrationForm, ChangePasswordForm
+from app.forms import LoginForm, RegistrationForm, ChangePasswordForm, AddUserForm, AddBalanceForm
 from flask_login import current_user, login_user, logout_user, login_required
 import sqlalchemy as sa
 from app.models import User, Role, Prints
@@ -80,6 +80,45 @@ def register():
         flash('Registatration Complete!!')
         return redirect(url_for('login'))
     return render_template('register.html', title='Register', form=form)
+
+@app.route('/add_user', methods=['GET', 'POST'])
+@login_required
+def add_user():
+    if not(current_user.role.name == 'Admin' or current_user.role.name == 'Printer_AG'):
+        abort(403)
+    form = AddUserForm()
+    if form.validate_on_submit():
+        user = User(username=form.username.data)
+        user.set_password(form.password.data)
+        user.balance = form.balance.data
+        user.weekly_limit = 10
+        user.pages_printed = 0 
+        user.weekly_print_number = 0
+        user.room_number = User(room_number=form.room_number.data)
+        user.role_id=1
+        user.fs_uniquifier = uuid.uuid4().hex
+        db.session.add(user)
+        db.session.commit()
+        flash('User Added Successfully')
+        return redirect(url_for('add_user'))
+    return render_template('add_user.html', title='Add User', form=form)
+
+@app.route('/add_balance', methods=['GET', 'POST'])
+@login_required
+def add_balance():
+    if not(current_user.role.name == 'Admin' or current_user.role.name == 'Printer_AG'):
+        abort(403)
+    form = AddBalanceForm()
+    if form.validate_on_submit():
+        user = db.session.scalar(sa.select(User).where(User.username == form.username.data))
+        if user is None:
+            flash('User Not Found')
+            return redirect(url_for('add_balance'))
+        user.add_balance(form.balance.data)
+        db.session.commit()
+        flash('Balance Added Successfully. Total Balance: ' + str(round(user.balance, 3)) + '€')
+        return redirect(url_for('add_balance'))
+    return render_template('add_balance.html', title='Add Balance', form=form)
 
 ###################################################################################################
 # User Profile and Change Password
