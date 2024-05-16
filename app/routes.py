@@ -71,7 +71,7 @@ def register():
         user.weekly_limit = 10
         user.balance = 0
         user.pages_printed = 0 
-        user.weekly_print_number = 10
+        user.weekly_print_number = 0
         user.room_number = 9999
         user.role_id=1
         user.fs_uniquifier = uuid.uuid4().hex
@@ -107,11 +107,11 @@ def edit_user():
 
 class AdminPage(BaseView):
     def is_accessible(self):
-        return current_user.is_authenticated and current_user.role.name == 'Admin'
+        return current_user.is_authenticated and (current_user.role.name == 'Admin' or current_user.role.name == 'Printer_AG')
 
 class AdminModelView(ModelView):
     def is_accessible(self):
-        return current_user.is_authenticated and current_user.role.name == 'Admin'
+        return current_user.is_authenticated and (current_user.role.name == 'Admin' or current_user.role.name == 'Printer_AG')
 
     def _handle_view(self, name, **kwargs):
         if not self.is_accessible():

@@ -44,7 +44,7 @@ class User(UserMixin, db.Model):
 
         total_pages_last_week = db.session.query(db.func.sum(Prints.number_of_pages)).filter(Prints.printed_by_id == printed_by_id).filter(Prints.time_stamp >= last_week_start).filter(Prints.time_stamp <= last_week_end).scalar()
         self.weekly_print_number = total_pages_last_week
-        return total_pages_last_week if total_pages_last_week else None
+        return total_pages_last_week if total_pages_last_week else 0
 
     def weekly_limit_check(self, number_of_pages):
         sum_pages = self.sum_pages_last_week(self.id)
@@ -53,13 +53,15 @@ class User(UserMixin, db.Model):
         else:
             return (self.weekly_print_number + number_of_pages <= self.weekly_limit)
 
-
     def can_print(self, number_of_pages):
         return (self.balance_check(number_of_pages) and self.weekly_limit_check(number_of_pages))
     
     def post_printing(self, number_of_pages):
         self.pages_printed += number_of_pages
         self.balance -= number_of_pages*0.05
+
+    def add_balance(self, amount):
+        self.balance += amount
 
 class Prints(db.Model):
     id: so.Mapped[int] = so.mapped_column(primary_key=True)
