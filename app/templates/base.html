@@ -7,8 +7,7 @@
       <title>Welcome to PrinterAG</title>
       {% endif %}
       
-      <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=yes" />
-      
+      <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
       <style>
         .main {
           display: center;
@@ -26,7 +25,7 @@
             background-color: #f8f9fa;
             margin: 0;
             padding: 0;
-            display: center;
+            display: flex;
             justify-content: center;
             height: 100vh;
             text-align: left;
@@ -130,8 +129,8 @@
                 <a href="{{ url_for('login') }}">Login</a>
                 {% else %}
                 <a href="{{url_for('print') }}"> Print </a>
-                <a href="{{ url_for('logout') }}">Logout</a>
                 <a href="{{ url_for('edit_user') }}">Change Password</a>
+                <a href="{{ url_for('logout') }}">Logout</a>
                 {% endif %}
                 {% if current_user.role.name=='Admin' %}
                 <a href="{{ url_for('admin.index') }}">Admin</a>
