@@ -1,10 +1,9 @@
 {% extends 'base.html' %}
 
 {% block content %}
-    <h1>Change Password</h1>
-    
     <form action="" method="post">
         {{ form.hidden_tag() }}
+        <h1>Change Password</h1>
         <p>
             {{ form.current_password.label }}<br>
             {{ form.current_password(size=32) }}<br>

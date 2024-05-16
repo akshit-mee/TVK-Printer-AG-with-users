@@ -6,12 +6,86 @@
       {% else %}
       <title>Welcome to PrinterAG</title>
       {% endif %}
+      
+      <meta name="viewport" content="initial-scale=1.0, maximum-scale=1.0, user-scalable=yes" />
+      
       <style>
-        body {
-          font-family: Arial, sans-serif;
+        .main {
+          display: center;
           margin: 0;
           padding: 0;
+          justify-content: center;
+          align-items: center;
+          text-align: center;
+          height: 100vh;
+          
         }
+
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f8f9fa;
+            margin: 0;
+            padding: 0;
+            display: center;
+            justify-content: center;
+            height: 100vh;
+            text-align: left;
+        }
+
+        form {
+            background-color: #ffffff;
+            padding: 40px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            width: 300px;
+            text-align: center;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 0px;
+            color: #495057;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            box-sizing: border-box;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            outline: none;
+        }
+
+        input[type="submit"] {
+            background-color: #007bff;
+            color: #ffffff;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        input[type="submit"]:hover {
+            background-color: #0056b3;
+        }
+
+        input[type="checkbox"] {
+            margin-right: 5px;
+        }
+
+        input[type="file"] {
+            width: calc(100% - 20px);
+            padding: 10px;
+            margin: 10px 0;
+            box-sizing: border-box;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+            outline: none;
+        }
+
+        input[type="file"]:focus {
+            border-color: #007bff;
+        }
+        
         .header {
           background-color: #f5f5f5;
           padding: 10px;
@@ -20,14 +94,23 @@
           background-color: #333;
           color: #fff;
           padding: 10px;
+          justify-content: center;
+          border-radius: 5px;
+          width: 380px;
         }
         .nav a {
           color: #fff;
           margin-right: 10px;
           text-decoration: none;
+          justify-content: center;
         }
+        .nav a:hover {
+          text-decoration: underline;
+        }
+
         .content {
           padding: 10px;
+          width: 380px;
         }
         .message {
           background-color: #f8f8f8;
@@ -37,34 +120,37 @@
       </style>
     </head>
     <body>
-       {# <div class="header">
-            PrinterAG:
-        </div> #}
-        <div class="nav">
-            <a href="{{ url_for('index') }}">Home</a>
-            {% if current_user.is_anonymous %}
-            <a href="{{ url_for('login') }}">Login</a>
-            {% else %}
-            <a href="{{url_for('print') }}"> Print </a>
-            <a href="{{ url_for('logout') }}">Logout</a>
-            <a href="{{ url_for('edit_user') }}">Change Password</a>
-            {% endif %}
-            {% if current_user.role.name=='Admin' %}
-            <a href="{{ url_for('admin.index') }}">Admin</a>
-            {% endif %}
-        </div>
-        <hr>
-        <div class="content">
-            {% with messages = get_flashed_messages() %}
-            {% if messages %}
-            <ul>
-                {% for message in messages %}
-                <li class="message">{{ message }}</li>
-                {% endfor %}
-            </ul>
-            {% endif %}
-            {% endwith %}
-            {% block content %}{% endblock %}
+        <div class="main">
+        {# <div class="header">
+                PrinterAG:
+            </div> #}
+            <div class="nav">
+                <a href="{{ url_for('index') }}">Home</a>
+                {% if current_user.is_anonymous %}
+                <a href="{{ url_for('login') }}">Login</a>
+                {% else %}
+                <a href="{{url_for('print') }}"> Print </a>
+                <a href="{{ url_for('logout') }}">Logout</a>
+                <a href="{{ url_for('edit_user') }}">Change Password</a>
+                {% endif %}
+                {% if current_user.role.name=='Admin' %}
+                <a href="{{ url_for('admin.index') }}">Admin</a>
+                {% endif %}
+            </div>
+            <br>
+            <div class="content">
+                {% with messages = get_flashed_messages() %}
+                {% if messages %}
+                <ul>
+                    {% for message in messages %}
+                    <li class="message">{{ message }}</li>
+                    {% endfor %}
+                </ul>
+                {% endif %}
+                {% endwith %}
+                {% block content %}{% endblock %}
+            </div>
         </div>
     </body>
+
 </html>
