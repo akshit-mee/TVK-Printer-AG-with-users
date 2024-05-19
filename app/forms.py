@@ -15,8 +15,8 @@ class LoginForm(FlaskForm):
     
 class RegistrationForm(FlaskForm):
     username = StringField('Username', validators=[DataRequired()])
-    password = StringField('Password', validators=[DataRequired()])
-    password2 = StringField('Repeated Password', validators=[DataRequired(), EqualTo('password')])
+    password = PasswordField('Password', validators=[DataRequired()])
+    password2 = PasswordField('Repeated Password', validators=[DataRequired(), EqualTo('password')])
     submit = SubmitField('Register')
     
     def validate_username(self, username):
@@ -26,9 +26,9 @@ class RegistrationForm(FlaskForm):
             raise ValidationError('Username already registered')
         
 class ChangePasswordForm(FlaskForm):
-    current_password = StringField('Current Password', validators=[DataRequired()])
-    new_password = StringField('New Password', validators=[DataRequired()])
-    new_password2 = StringField('Repeat New Password', validators=[DataRequired(), EqualTo('new_password')])
+    current_password = PasswordField('Current Password', validators=[DataRequired()])
+    new_password = PasswordField('New Password', validators=[DataRequired()])
+    new_password2 = PasswordField('Repeat New Password', validators=[DataRequired(), EqualTo('new_password')])
     submit = SubmitField('Change Password')
     
     def validate_old_password(self, old_password):
@@ -38,8 +38,8 @@ class ChangePasswordForm(FlaskForm):
         
 class AddUserForm(FlaskForm):
     username = StringField('Username', validators=[DataRequired()])
-    password = StringField('Password', validators=[DataRequired()])
-    password2 = StringField('Repeat Password', validators=[DataRequired(), EqualTo('password')])
+    password = PasswordField('Password', validators=[DataRequired()])
+    password2 = PasswordField('Repeat Password', validators=[DataRequired(), EqualTo('password')])
     room_number = IntegerField('Room Number', validators=[DataRequired()])
     balance = IntegerField('Balance', validators=[DataRequired(), NumberRange(min=0)])
     submit = SubmitField('Add User')
