@@ -19,18 +19,10 @@ import PyPDF2
 @app.route('/index')
 @login_required
 def index():
-    user = {'username': 'Akshit'}
-    posts = [
-        {
-            'author': {'username': 'John'},
-            'body': 'Beautiful day in Portland!'
-        },
-        {
-            'author': {'username': 'Susan'},
-            'body': 'The Avengers movie was so cool!'
-        }
-    ]
-    return render_template('index.html', title='Home', user=current_user, posts=posts)
+    if current_user.weekly_print_number == None:
+        current_user.weekly_print_number = 0
+
+    return render_template('index.html', title='Home', user=current_user)
 
 ###################################################################################################
 #Login and user registration
