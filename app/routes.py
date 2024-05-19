@@ -22,7 +22,7 @@ def index():
     if current_user.weekly_print_number == None:
         current_user.weekly_print_number = 0
 
-    return render_template('index.html', title='Home', user=current_user)
+    return render_template('index.html')
 
 ###################################################################################################
 #Login and user registration
@@ -253,11 +253,11 @@ def upload():
             db.session.commit()
 
         elif current_user.balance_check(number_of_pages):
-            return('weekly limit exceeded')
+            return render_template("error.html", error_header="Weekly Limit Exceeded", error_message="You have exceeded your weekly limit of 10 pages")
         elif current_user.weekly_limit_check(number_of_pages):
-            return('low balance')
+            return render_template("error.html", error_header="Low Balance", error_message="You have insufficient balance to print this document. Kindly add balance to your account to continue printing")
         else:
-            return('Error: CAN NOT PRINT')
+            return render_template("error.html", error_header="Error", error_message="An error occured while printing. Please try again later or contack the Printer AG for assistance.")
 
         os.remove(temp_file.name)
 
