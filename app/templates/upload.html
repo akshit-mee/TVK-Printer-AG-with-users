@@ -1,40 +1,9 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Uploaded</title>
-    <style>
-        body {
-            font-family: 'Arial', sans-serif;
-            background-color: #f8f9fa;
-            margin: 0;
-            padding: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-        }
+{% extends "base.html" %}
 
-        .error-container {
-            text-align: center;
-        }
-
-        h1 {
-            color: #343a40;
-            margin-bottom: 20px;
-        }
-
-        p {
-            color: #495057;
-        }
-    </style>
-</head>
-<body>
+{% block content %}
     <div class="error-container">
         <h1>Uploaded</h1>
         <p> File uploaded and sent to the printer. </p>
-		<p> check the status here <a href="{{ url_for('cups_server') }}" target="_blank" rel="noopener noreferrer"> here!</a> </p>
+        <p> check the status here <a href="{{ url_for('cups_server') }}" target="_blank" rel="noopener noreferrer"> here!</a> </p>
     </div>
-</body>
-</html>
+{% endblock %}
