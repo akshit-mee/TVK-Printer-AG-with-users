@@ -26,6 +26,8 @@ def index():
     sum_pages = current_user.sum_pages_last_week(current_user.id)
     current_user.weekly_print_number = sum_pages
 
+    if current_user.banned == True:
+        flash('You have been banned from printing. Please contact the Printer AG for more information')
     return render_template('index.html')
 
 ###################################################################################################
@@ -270,6 +272,8 @@ def upload():
             db.session.add(print)
             db.session.commit()
 
+        elif current_user.banned:
+            return render_template("error.html", error_header="Banned", error_message="You have been banned from printing. Please contact the Printer AG for more information")
         elif current_user.balance_check(number_of_pages):
             return render_template("error.html", error_header="Weekly Limit Exceeded", error_message="You have exceeded your weekly limit of 10 pages")
         elif current_user.weekly_limit_check(number_of_pages):

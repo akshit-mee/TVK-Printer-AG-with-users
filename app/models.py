@@ -23,6 +23,7 @@ class User(UserMixin, db.Model):
     role: so.Mapped['Role'] = so.relationship(backref=db.backref('users', lazy=True))
     prints: so.WriteOnlyMapped['Prints'] = so.relationship(back_populates='printed_by_name')
     balance_log: so.WriteOnlyMapped['BalanceTransaction'] = so.relationship(back_populates='user')
+    banned: so.Mapped[bool] = so.mapped_column(sa.Boolean, default=False, nullable=True)
     # fs_uniquifier: so.Mapped[str] = so.mapped_column(sa.String(64), unique = True, nullable=True)
 
 
@@ -53,7 +54,7 @@ class User(UserMixin, db.Model):
         return (self.weekly_print_number + number_of_pages <= self.weekly_limit)
 
     def can_print(self, number_of_pages):
-        return (self.balance_check(number_of_pages) and self.weekly_limit_check(number_of_pages))
+        return (self.balance_check(number_of_pages) and self.weekly_limit_check(number_of_pages) and not self.banned)
     
     def post_printing(self, number_of_pages):
         self.pages_printed += number_of_pages
