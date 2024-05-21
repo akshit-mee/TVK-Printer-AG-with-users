@@ -68,7 +68,7 @@ def register():
         user.pages_printed = 0 
         user.weekly_print_number = 0
         user.room_number = 9999
-        user.role_id=1
+        user.role_id=3
         user.fs_uniquifier = uuid.uuid4().hex
         db.session.add(user)
         db.session.commit()
