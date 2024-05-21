@@ -22,6 +22,9 @@ def index():
     if current_user.weekly_print_number == None:
         current_user.weekly_print_number = 0
 
+    sum_pages = current_user.sum_pages_last_week(current_user.id)
+    current_user.weekly_print_number = sum_pages
+
     return render_template('index.html')
 
 ###################################################################################################

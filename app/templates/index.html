@@ -3,9 +3,13 @@
 {% block content %}
 <form>
     <h1>Welcome {{ current_user.username }}</h1>
+    <p>
     current_balance: {{ current_user.balance | round(4) }} <hr>
     Pages printed this week: {{ current_user.weekly_print_number }} <hr>
-    Pages remaining this week: {{ current_user.weekly_limit - current_user.weekly_print_number }}
+    Pages remaining this week: {{ current_user.weekly_limit - current_user.weekly_print_number }}<hr>
+    Total pages printed: {{ current_user.pages_printed }}<hr>
+    </p>
+
 </form>
 
 
