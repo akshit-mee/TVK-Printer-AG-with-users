@@ -81,6 +81,7 @@ class BalanceTransaction(db.Model):
     user_id: so.Mapped[int] = so.mapped_column(sa.ForeignKey(User.id), index=True)
     user: so.Mapped[User] = so.relationship(back_populates='balance_log')
     amount: so.Mapped[float] = so.mapped_column(sa.Float, nullable=False)
+    description: so.Mapped[str] = so.mapped_column(sa.String(120), nullable=True)
     timestamp: so.Mapped[datetime] = so.mapped_column(index=True, default=lambda: datetime.now(timezone.utc))
 
 @login.user_loader

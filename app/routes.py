@@ -101,7 +101,7 @@ def add_user():
         user.room_number = User(room_number=form.room_number.data)
         user.role_id=1
         user.fs_uniquifier = uuid.uuid4().hex
-        log = BalanceTransaction(user_id=user.id, amount=form.balance.data)
+        log = BalanceTransaction(user_id=user.id, amount=form.balance.data, description='Initial Balance During Registration')
         db.session.add(log)
         db.session.add(user)
         db.session.commit()
@@ -121,7 +121,7 @@ def add_balance():
             flash('User Not Found')
             return redirect(url_for('add_balance'))
         user.add_balance(form.balance.data)
-        log = BalanceTransaction(user_id=user.id, amount=form.balance.data)
+        log = BalanceTransaction(user_id=user.id, amount=form.balance.data, description='Added Balance')
         db.session.add(log)
         db.session.commit()
         flash('Balance Added Successfully. Total Balance: ' + str(round(user.balance, 3)) + '€')
@@ -174,6 +174,12 @@ def edit_user():
             flash('Incorrect Password')
             return redirect(url_for('edit_user'))
     return render_template('edit_user.html', title='Change Password', form=form)
+
+@app.route('/balance_log')
+@login_required
+def balance_log():
+    balance_log = db.session.query(BalanceTransaction).filter(BalanceTransaction.user_id == current_user.id).all()
+    return render_template('balance_log.html', transactions=balance_log)
 
 
 
@@ -299,7 +305,7 @@ def upload():
             # cups.setUser (user_name)
             # conn.printFile(printer_name, temp_file.name, temp_file.name, options) # add functionality to change Print Job to the AG member responsible
             current_user.post_printing(number_of_pages)
-            log = BalanceTransaction(user_id=current_user.id, amount= -number_of_pages*user_default.print_cost)
+            log = BalanceTransaction(user_id=current_user.id, amount= -number_of_pages*user_default.print_cost, description='Printed Document of %d pages' % number_of_pages)
             db.session.add(log)
             print= Prints(number_of_pages=number_of_pages, printed_by_id=current_user.id, time_stamp=datetime.now(timezone.utc) )
             print.number_of_pages = number_of_pages

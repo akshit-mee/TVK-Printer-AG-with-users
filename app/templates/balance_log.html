@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block content %}
+<form>
+    <img src = "../static/PrinterAG.png" style="width:120;height:120px;">
+    <h1>Transaction Log </h1>
+
+
+    <table>
+        <tr>
+            <th>Amount</th>
+            <th>Description</th>
+            <th>Time</th>
+        </tr>
+        {% for transaction in transactions %}
+        <tr>
+            <td>{{ transaction.amount }}</td>
+            <td>{{ transaction.description }}</td>
+            <td>{{ transaction.timestamp }}</td>
+        </tr>
+        {% endfor %}
+</form>
+
+
+{% endblock %}
