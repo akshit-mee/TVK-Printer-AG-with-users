@@ -15,6 +15,7 @@ class LoginForm(FlaskForm):
     
 class RegistrationForm(FlaskForm):
     username = StringField('Username', validators=[DataRequired()])
+    room_number = IntegerField('Room Number', validators=[DataRequired(), NumberRange(min=0, max=1517)])
     password = PasswordField('Password', validators=[DataRequired()])
     password2 = PasswordField('Repeated Password', validators=[DataRequired(), EqualTo('password')])
     submit = SubmitField('Register')
@@ -40,7 +41,7 @@ class AddUserForm(FlaskForm):
     username = StringField('Username', validators=[DataRequired()])
     password = PasswordField('Password', validators=[DataRequired()])
     password2 = PasswordField('Repeat Password', validators=[DataRequired(), EqualTo('password')])
-    room_number = IntegerField('Room Number', validators=[DataRequired()])
+    room_number = IntegerField('Room Number', validators=[DataRequired(), NumberRange(min=0, max=1517)])
     balance = IntegerField('Balance', validators=[DataRequired(), NumberRange(min=0)])
     submit = SubmitField('Add User')
     
