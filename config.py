@@ -13,3 +13,6 @@ class user_default:
     pages_printed = 0 
     weekly_print_number = 0
     room_number = 9999
+    role_id = 3
+    banned = False
+    print_cost = 0.05

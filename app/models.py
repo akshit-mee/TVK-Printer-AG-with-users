@@ -7,6 +7,7 @@ from flask_login import UserMixin, AnonymousUserMixin
 from datetime import datetime, timezone
 import pytz
 from datetime import timedelta, datetime, timezone
+import config
 
 
 class User(UserMixin, db.Model):
@@ -59,7 +60,7 @@ class User(UserMixin, db.Model):
     def post_printing(self, number_of_pages):
         self.pages_printed += number_of_pages
         self.weekly_print_number += number_of_pages
-        self.balance -= number_of_pages*0.05
+        self.balance -= number_of_pages*config.user_default.print_cost
 
     def add_balance(self, amount):
         self.balance += amount

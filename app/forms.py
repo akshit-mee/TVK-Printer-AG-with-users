@@ -62,4 +62,14 @@ class AddBalanceForm(FlaskForm):
         if user is None:
             raise ValidationError('Username not found')
         
+class BanUserForm(FlaskForm):
+    username = StringField('Username', validators=[DataRequired()])
+    ban = SubmitField('Ban User')
+    unban = SubmitField('Unban User')
+    
+    def validate_username(self, username):
+        user = db.session.scalar(sa.select(User).where(
+            User.username == username.data))
+        if user is None:
+            raise ValidationError('Username not found') 
 

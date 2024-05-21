@@ -1,6 +1,6 @@
 from flask import render_template, flash, redirect, url_for, request, abort
 from app import app, db
-from app.forms import LoginForm, RegistrationForm, ChangePasswordForm, AddUserForm, AddBalanceForm
+from app.forms import LoginForm, RegistrationForm, ChangePasswordForm, AddUserForm, AddBalanceForm, BanUserForm
 from flask_login import current_user, login_user, logout_user, login_required
 import sqlalchemy as sa
 from app.models import User, Role, Prints, BalanceTransaction
@@ -14,6 +14,7 @@ from flask_security import Security, SQLAlchemyUserDatastore
 import uuid
 import PyPDF2
 from datetime import datetime, timezone
+from config import user_default
 
 
 @app.route('/')
@@ -66,18 +67,23 @@ def register():
     if form.validate_on_submit():
         user = User(username=form.username.data)
         user.set_password(form.password.data)
-        user.weekly_limit = 10
-        user.balance = 0
-        user.pages_printed = 0 
-        user.weekly_print_number = 0
-        user.room_number = 9999
-        user.role_id=3
+        user.weekly_limit = user_default.weekly_limit
+        user.balance = user_default.balance
+        user.pages_printed = user_default.pages_printed
+        user.weekly_print_number = user_default.weekly_print_number
+        user.room_number = form.room_number.data
+        user.role_id= user_default.role_id
+        user.banned = user_default.banned
         user.fs_uniquifier = uuid.uuid4().hex
         db.session.add(user)
         db.session.commit()
         flash('Registatration Complete!!')
         return redirect(url_for('login'))
     return render_template('register.html', title='Register', form=form)
+
+###################################################################################################
+# PrinterAG role: add user, add balance, ban user
+###################################################################################################
 
 @app.route('/add_user', methods=['GET', 'POST'])
 @login_required
@@ -121,6 +127,35 @@ def add_balance():
         flash('Balance Added Successfully. Total Balance: ' + str(round(user.balance, 3)) + '€')
         return redirect(url_for('add_balance'))
     return render_template('add_balance.html', title='Add Balance', form=form)
+
+@app.route('/ban_user', methods=['GET', 'POST'])
+@login_required
+def ban_user():
+    if not(current_user.role.name == 'Admin' or current_user.role.name == 'Printer_AG'):
+        abort(403)
+    form = BanUserForm()
+    if form.validate_on_submit():
+        user = db.session.scalar(sa.select(User).where(User.username == form.username.data))
+        if user is None:
+            flash('User Not Found')
+            return redirect(url_for('ban_user'))
+        if user.role.name == 'Admin':
+            flash('Cannot Ban Admin')
+            return redirect(url_for('ban_user'))
+        if user.role.name == 'Printer_AG' and current_user.role.name != 'Admin':
+            flash('Cannot Ban Printer AG if not a Admin')
+            return redirect(url_for('ban_user'))
+        if form.ban.data:
+            user.banned = True
+            db.session.commit()
+            flash('User Banned Successfully')
+            return redirect(url_for('ban_user'))
+        elif form.unban.data:
+            user.banned = False
+            db.session.commit()
+            flash('User Unbanned Successfully')
+            return redirect(url_for('ban_user'))
+    return render_template('ban_user.html', title='Ban User', form=form)
 
 ###################################################################################################
 # User Profile and Change Password
@@ -264,7 +299,7 @@ def upload():
             # cups.setUser (user_name)
             # conn.printFile(printer_name, temp_file.name, temp_file.name, options) # add functionality to change Print Job to the AG member responsible
             current_user.post_printing(number_of_pages)
-            log = BalanceTransaction(user_id=current_user.id, amount= -number_of_pages*0.05)
+            log = BalanceTransaction(user_id=current_user.id, amount= -number_of_pages*user_default.print_cost)
             db.session.add(log)
             print= Prints(number_of_pages=number_of_pages, printed_by_id=current_user.id, time_stamp=datetime.now(timezone.utc) )
             print.number_of_pages = number_of_pages

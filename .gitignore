@@ -9,6 +9,7 @@ instance/
 .env
 .flakenv
 venv/
+migrations/
 
 # SQL
 *.db
