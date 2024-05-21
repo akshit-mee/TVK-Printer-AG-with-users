@@ -3,7 +3,7 @@ from app import app, db
 from app.forms import LoginForm, RegistrationForm, ChangePasswordForm, AddUserForm, AddBalanceForm
 from flask_login import current_user, login_user, logout_user, login_required
 import sqlalchemy as sa
-from app.models import User, Role, Prints
+from app.models import User, Role, Prints, BalanceTransaction
 from urllib.parse import urlsplit
 # import cups
 import tempfile
@@ -13,6 +13,7 @@ from flask_admin import BaseView, Admin
 from flask_security import Security, SQLAlchemyUserDatastore
 import uuid
 import PyPDF2
+from datetime import datetime, timezone
 
 
 @app.route('/')
@@ -92,6 +93,8 @@ def add_user():
         user.room_number = User(room_number=form.room_number.data)
         user.role_id=1
         user.fs_uniquifier = uuid.uuid4().hex
+        log = BalanceTransaction(user_id=user.id, amount=form.balance.data)
+        db.session.add(log)
         db.session.add(user)
         db.session.commit()
         flash('User Added Successfully')
@@ -110,6 +113,8 @@ def add_balance():
             flash('User Not Found')
             return redirect(url_for('add_balance'))
         user.add_balance(form.balance.data)
+        log = BalanceTransaction(user_id=user.id, amount=form.balance.data)
+        db.session.add(log)
         db.session.commit()
         flash('Balance Added Successfully. Total Balance: ' + str(round(user.balance, 3)) + '€')
         return redirect(url_for('add_balance'))
@@ -151,7 +156,7 @@ class AdminModelView(ModelView):
         if not self.is_accessible():
             return redirect(url_for('login', next=request.url))
         
-    form_excluded_columns=('prints')
+    form_excluded_columns=('prints', 'balance_log', 'password_hash')
 
 
 class UserAdmin(AdminModelView):
@@ -166,15 +171,23 @@ class RoleAdmin(AdminModelView):
     column_filters = ('name',)
 
 class PrintAdmin(AdminModelView):
-    column_list = ('id','number_of_pages', 'printed_by_name', 'time')
+    column_list = ('id','number_of_pages', 'printed_by_name.username', 'time_stamp')
     column_labels = {'id': 'ID', 'number_of_pages': 'Pages', 'printed_by_name.username': 'Printed By', 'time_stamp': 'Time'}
+
+class BalanceTransactionAdmin(AdminModelView):
+    column_list = ('id', 'user.username', 'amount', 'timestamp')
+    column_labels = {'id': 'ID', 'user.username': 'User', 'amount': 'Amount', 'timestamp': 'Time'}
+
 admin = Admin(app, name = 'Admin Panel', base_template='my_master.html', template_mode = 'bootstrap4')
+
+
 # admin.add_view(ModelView(models.User, db.session))
 # admin.add_view(ModelView(models.Role, db.session))
 
 admin.add_view(UserAdmin(User, db.session))
 admin.add_view(RoleAdmin(Role, db.session))
 admin.add_view(PrintAdmin(Prints, db.session))
+admin.add_view(BalanceTransactionAdmin(BalanceTransaction, db.session))
 
 
 ####################################################################################################
@@ -249,7 +262,9 @@ def upload():
             # cups.setUser (user_name)
             # conn.printFile(printer_name, temp_file.name, temp_file.name, options) # add functionality to change Print Job to the AG member responsible
             current_user.post_printing(number_of_pages)
-            print= Prints()
+            log = BalanceTransaction(user_id=current_user.id, amount= -number_of_pages*0.05)
+            db.session.add(log)
+            print= Prints(number_of_pages=number_of_pages, printed_by_id=current_user.id, time_stamp=datetime.now(timezone.utc) )
             print.number_of_pages = number_of_pages
             print.printed_by_id = current_user.id
             db.session.add(print)

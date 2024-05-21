@@ -6,7 +6,7 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from flask_login import UserMixin, AnonymousUserMixin
 from datetime import datetime, timezone
 import pytz
-from datetime import timedelta, datetime
+from datetime import timedelta, datetime, timezone
 
 
 class User(UserMixin, db.Model):
@@ -22,6 +22,7 @@ class User(UserMixin, db.Model):
     role_id: so.Mapped[int] = db.mapped_column(sa.ForeignKey('role.id'), index=True)
     role: so.Mapped['Role'] = so.relationship(backref=db.backref('users', lazy=True))
     prints: so.WriteOnlyMapped['Prints'] = so.relationship(back_populates='printed_by_name')
+    balance_log: so.WriteOnlyMapped['BalanceTransaction'] = so.relationship(back_populates='user')
     # fs_uniquifier: so.Mapped[str] = so.mapped_column(sa.String(64), unique = True, nullable=True)
 
 
@@ -72,6 +73,13 @@ class Prints(db.Model):
 class Role(db.Model):
     id: so.Mapped[int] = so.mapped_column(primary_key=True)
     name: so.Mapped[str] = so.mapped_column(sa.String(80), unique=True, nullable = False)
+
+class BalanceTransaction(db.Model):
+    id: so.Mapped[int] = so.mapped_column(primary_key=True)
+    user_id: so.Mapped[int] = so.mapped_column(sa.ForeignKey(User.id), index=True)
+    user: so.Mapped[User] = so.relationship(back_populates='balance_log')
+    amount: so.Mapped[float] = so.mapped_column(sa.Float, nullable=False)
+    timestamp: so.Mapped[datetime] = so.mapped_column(index=True, default=lambda: datetime.now(timezone.utc))
 
 @login.user_loader
 def load_user(id):
