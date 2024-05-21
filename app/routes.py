@@ -27,9 +27,11 @@ def index():
     sum_pages = current_user.sum_pages_last_week(current_user.id)
     current_user.weekly_print_number = sum_pages
 
+    if current_user.role.name == 'Admin' or current_user.role.name == 'Printer_AG':
+        total_pages = db.session.query(db.func.sum(Prints.number_of_pages)).scalar()
     if current_user.banned == True:
         flash('You have been banned from printing. Please contact the Printer AG for more information')
-    return render_template('index.html')
+    return render_template('index.html', total_pages=total_pages)
 
 ###################################################################################################
 #Login and user registration
