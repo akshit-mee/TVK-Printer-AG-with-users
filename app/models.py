@@ -25,6 +25,7 @@ class User(UserMixin, db.Model):
     prints: so.WriteOnlyMapped['Prints'] = so.relationship(back_populates='printed_by_name')
     balance_log: so.WriteOnlyMapped['BalanceTransaction'] = so.relationship(back_populates='user')
     banned: so.Mapped[bool] = so.mapped_column(sa.Boolean, default=False, nullable=True)
+    registered: so.Mapped[bool] = so.mapped_column(sa.Boolean, default=False, nullable=True)
     # fs_uniquifier: so.Mapped[str] = so.mapped_column(sa.String(64), unique = True, nullable=True)
 
 

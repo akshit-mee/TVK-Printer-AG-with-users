@@ -16,3 +16,4 @@ class user_default:
     role_id = 3
     banned = False
     print_cost = 0.05
+    registered = False

@@ -26,11 +26,11 @@ def index():
 
     sum_pages = current_user.sum_pages_last_week(current_user.id)
     current_user.weekly_print_number = sum_pages
-
-    if current_user.role.name == 'Admin' or current_user.role.name == 'Printer_AG':
-        total_pages = db.session.query(db.func.sum(Prints.number_of_pages)).scalar()
+    total_pages = db.session.query(db.func.sum(Prints.number_of_pages)).scalar()
     if current_user.banned == True:
         flash('You have been banned from printing. Please contact the Printer AG for more information')
+    if current_user.registered == False:
+        flash('Please register your account with the Printer AG')
     return render_template('index.html', total_pages=total_pages)
 
 ###################################################################################################
@@ -76,6 +76,7 @@ def register():
         user.room_number = form.room_number.data
         user.role_id= user_default.role_id
         user.banned = user_default.banned
+        user.registered= user_default.registered
         user.fs_uniquifier = uuid.uuid4().hex
         db.session.add(user)
         db.session.commit()
@@ -102,6 +103,8 @@ def add_user():
         user.weekly_print_number = 0
         user.room_number = User(room_number=form.room_number.data)
         user.role_id=1
+        user.banned = False
+        user.registered = True
         user.fs_uniquifier = uuid.uuid4().hex
         log = BalanceTransaction(user_id=user.id, amount=form.balance.data, description='Initial Balance During Registration')
         db.session.add(log)
@@ -123,6 +126,7 @@ def add_balance():
             flash('User Not Found')
             return redirect(url_for('add_balance'))
         user.add_balance(form.balance.data)
+        user.registered = True
         log = BalanceTransaction(user_id=user.id, amount=form.balance.data, description='Added Balance')
         db.session.add(log)
         db.session.commit()
